@@ -273,12 +273,14 @@ In this paper, we solve the symbolic classification problem. TODO
 %%
 	\section{Introduction}\label{sec:introduction}
 
-The problem of symbolic regression (SR)~\cite{billard2002symbolic} is one of a central problem within the machine learning and mathematical optimization community; it has attracted many researchers to study it over the last few decades. 
-SR can be seen as  a type of regression analysis; it  searches a mathematical expressions f $\mathbb{R}^m \mapsto \mathbb{R}$ as the model that best fits a given dataset $(\textbf{X}=(\textbf{x}_1, \ldots, \textbf{x}_n)^T, \textbf{y}), \textbf{x}_i \in \mathbb{R}^m, \textbf{y}\in \mathbb{R}^n, m, n\in \mathbb{N}$   in terms of  both, accuracy as well as simplicity. The problem itself can be seen as a generalization of specific variants of regression where the desired functional form of model $f$ is pre-assumed, e.g., the well-known linear regression considers only linear-form models, while polynomial regression allows any polynomial for a feasible model~\cite{stimson1978interpreting}, etc. SR problem can be seen as an of-shot of the Genetic programming (GP) methodology introduced by Koza~\cite{koza1994genetic}.  SR has received many attention being solved by a few dozens of algorithms such as Genetic programming~\cite{augusto2000symbolic}, a Bee colony optimization algorithm~\cite{karaboga2012artificial}, a divide-and-conquer based approaches~\cite{udrescu2020ai}, an iterated greedy--based method RILS-ROLS~\cite{kartelj2023rils}, just to name a few.  The later approach is proven to be  the current state-of-the-art on the ground-truth SR problems from literature, that are collected in the two well-known benchmark sets, labelled Feynman and Strogatz. It is worth mentioning that when comes to solving  black-box SR, that is, when the task is to seek a best fitting model on input dataset quantified by, e.g.,  $R^2$ value (or some other measure of success) without knowing what the real model is, the best performing algorithms from literature are  Operon~\cite{burlacu2020operon}, SBP-GP~\cite{virgolin2019linear}, followed by the above-mentioned RILS-ROLS. Nowadays, SR is pushed into the rank of moderate-to-extreme accuracy. 
-SR has show its strength and applicability in solving many problems from various research fields such as material science~\cite{wang2019symbolic}, wind speed forecasting~\cite{abdellaoui2021symbolic},  highway crash prediction~\cite{veran2023interpretable}, language assessment~\cite{aryadoust2015application}, etc.  Solving SR is known to be NP-hard in general~\cite{virgolin2022symbolic}. \fxnote{Say something about SRBench platform...}
+The problem of symbolic regression (SR)~\cite{billard2002symbolic} is one of a central problem in the filed of machine learning (ML) and mathematical optimization; it has attracted many researchers to study it over the last few decades. 
+SR can be seen as  a type of regression analysis; it  searches a mathematical expressions $f$, called a model,  that best fits to the data; more precisely,  given is a set of input data $\textbf{X}$ and a set of target variables $\textbf{y}$, we aim at a mathematical formula $f$ that explains the target variable in terms of the input data, that is $f(\textbf{X}) = \textbf{y}$. In essence, a good candidate solution $f$ must be accurate enough to the output variables as well simple enough. The problem itself can be seen as a generalization of specific variants of regression where the desired functional form of model $f$ is pre-assumed, e.g., the well-known linear regression considers only linear-form models, while polynomial regression allows any polynomial for a feasible model~\cite{stimson1978interpreting}, etc. SR problem can be seen as an of-shot of the Genetic programming (GP) methodology introduced by Koza~\cite{koza1994genetic}.  SR has received many attention being solved by a few dozens of algorithms such as Genetic programming~\cite{augusto2000symbolic}, a Bee colony optimization algorithm~\cite{karaboga2012artificial}, a divide-and-conquer based approaches~\cite{udrescu2020ai}, an iterated greedy--based method RILS-ROLS~\cite{kartelj2023rils}, just to name a few.  The later approach is proven to be  the current state-of-the-art on the ground-truth SR problems from literature, that are collected in the two well-known benchmark sets, labelled Feynman and Strogatz. It is worth mentioning that when comes to solving  black-box SR, that is, when the task is to seek a best fitting model on data quantified by, e.g.,  $R^2$ value (or some other measure of success) without knowing what the real model is, the best performing algorithms from literature are  Operon~\cite{burlacu2020operon}, SBP-GP~\cite{virgolin2019linear}, followed by the above-mentioned RILS-ROLS. By popularization of SR among the researchers, uniform, robust, and transparent
+benchmarking standards were not known until the work of  La Cava et al.~\cite{la2021contemporary}, who  introduced an open-source, reproducible benchmarking platform \texttt{SRBench}. The authors extended  PMLB~\cite{olson2017pmlb} with a newly 130 SR datasets for which exact models are known. \texttt{SRBench} can execute 14 SR methods and 7 ML methods on the set of 252  regression problems. The rest (122) SR datasets belong to the class of  \emph{black-box} problems (the ground-truth is unknown).
+
+Nowadays, SR is pushed into the rank of moderate-to-extreme accuracy.  It has proven its strength and applicability in solving many problems from various research fields such as material science~\cite{wang2019symbolic}, wind speed forecasting~\cite{abdellaoui2021symbolic},  highway crash prediction~\cite{veran2023interpretable}, language assessment~\cite{aryadoust2015application}, etc.  Solving SR is known to be NP-hard in general~\cite{virgolin2022symbolic}. 
 
 
-Classification belongs to the field of supervised learning and many algorithms have been proposed to tackle various classes of classification problems (binary, multinomial, multi-class, etc.), see, for example~\cite{cunningham2008supervised, caruana2006empirical}. When comes to the \emph{symbolic classification} (SC) problem, the task here asks to finding suitable models (classifiers)  $f^i$ for each class $i \in C$ of a (discrete, finite) set of classes $C$ which are further projected into one of dominant  classes, by, for example, \texttt{sotfmax}, or \texttt{argmax} projectors (known by the name \emph{one-vs-rest} or \emph{one-to-all}  method). A considerably less work have been done in contrast to SR. Note that solving SR efficiently is just a half of a way to achieve it also for SC. It is known that directly applying GP is not that successful in solving the multi-class classification problems especially when comes to the problems with a high number of classes~\cite{korns2018evolutionary}. A survey paper on applying GP to solve (binary and multi-class) classification problems is provided in~\cite{espejo2009survey}.  In the last decade, several papers have been published which succeed to raised the SC accuracy in the level to complete with the existing commercial classification tools. These tools are based on evolutionary algorithms~\cite{korns2018evolutionary}, a genetic programming based approach~\cite{munoz2015m3gp,la2019multidimensional},  evolutionary discriminant analysis~\cite{korns2017evolutionary}, etc. 
+Classification belongs to the field of supervised learning and many algorithms have been proposed to tackle various classes of classification problems (binary, multinomial, multi-class, etc.), see, for example~\cite{cunningham2008supervised, caruana2006empirical}. When comes to the \emph{symbolic classification} (SC) problem, the task here is to finding suitable models (classifiers)  $f^i$ for each class $i \in C$ of a (discrete, finite) set of classes $C$ which are further projected into a dominant  class, by, for example, \texttt{sotfmax}, or \texttt{argmax} projectors (known by the name \emph{one-vs-rest} or \emph{one-to-all}  method). A considerably less work have been done for SC in contrast to SR. Note that solving SR efficiently is just a half of a way to achieve it also for SC. It is known that directly applying GP is not in particular successful for solving the multi-class classification problems especially when comes to the problems with a high number of classes~\cite{korns2018evolutionary}. A survey paper on applying GP to solve (binary and multi-class) classification problems is provided in~\cite{espejo2009survey}.  In the last decade, several papers have been published which succeed to raised the SC accuracy in the level to complete with the existing commercial classification tools. These tools are based on evolutionary algorithms~\cite{korns2018evolutionary}, a Multidimensional genetic programming based approach~\cite{munoz2015m3gp,la2019multidimensional},  evolutionary discriminant analysis~\cite{korns2017evolutionary}, etc. 
 
 In this paper, motivated by the success of solving SR efficiently provided by the recent studies, we propose two new classification algorithms that solve the problem of SC: ($i$) RILS-ROLS classifier, and ($ii$) HROCH classifier. 
 
@@ -298,12 +300,44 @@ The main contributions are as follows:
 \begin{enumerate}
 	\item We contributed to the field of Symbolic classification by providing two more classification algorithms at disposal. 
 	
-	\item The proposed methods are evaluated against state-of-the-art classification algorithms as well as a few symbolic classification algorithms. 
+	\item The proposed methods are evaluated against state-of-the-art classification algorithms as well as a few state-of-the-art SC algorithms from literature. 
+	\item \fxnote{TODO}
 \end{enumerate}
  
 \section{Definitions and notation} \label{sec:search-space}
-XX
-\fxnote{TODO}
+
+In this section we formally define the SR problem.
+
+\begin{definition}\ref{dfn:sr}
+	Given is a dataset $D = \{(\mathbf{x_i}, y_i)\}_{i=1}^n$, where $\mathbf{x_i} \in \mathbb{R}^d$ represents the $i$-th feature (input) vector and $y_i \in \mathbb{R}$ is its corresponding target (output) variable. Suppose the existence of an analytical model of the form $f(\mathbf{x})= g^*(\mathbf{x}, \theta^*) + \epsilon $ that can generate  all observations from $D$.  
+	SR aims at learning $\tilde{f}(\mathbf{x})=  \tilde{g}(\mathbf{x}, \tilde{\theta})  \colon \mathbb{R}^d \mapsto \mathbb{R}$  estimated by searching through the space of (mathematical) expressions  $\tilde{g}$ and parameters $\tilde{\theta}$ where  $\epsilon$ is the observed white noise within the given input data. 
+	
+\end{definition}
+
+
+\begin{definition}\ref{dfn:sc}
+	Given is a dataset $D = \{(\mathbf{x_i}, c_i)\}_{i=1}^n$, where $\mathbf{x_i}$ represents the $i$-th feature vector, and $c_i$  dependent unordered categorical
+	 value from  $\{1, \ldots, K  \} $. The aim of SC is to find $K$ (mathematical) expressions $f^i, i=1, \ldots, K$, so that $F(\mathbf{x_i}) = \textrm{argmax}( f^1(\mathbf{x_i}), \ldots, f^K(\mathbf{x_i})  ) = c_i,$ for $i=1, \ldots, K$. 
+  \end{definition}
+ 
+ 
+\emph{Notation}. Let $s \colon \mathbb{R}^n \mapsto \mathbb{R}$ be a model for data $D$ from Definition~\ref{dfn:sr}.  We introduce the following notation. 
+
+\begin{equation}
+	\label{eq:fitness}
+	fit(s) = (2-R^2(s)) \cdot (1+RMSE(s)) \cdot (1+penalty_{size} \cdot size(s))
+\end{equation}
+\begin{equation}
+		R^2(s) = 1- \frac{ \sum_{i=1}^{n} \left( s(\mathbf{x_i}) - y_i \right)^2  }{ \sum_{i=1}^{n} \left( y_{i}  - \overline{y} \right)^2  }
+	\end{equation}
+	\begin{equation}
+		RMSE(s) = \sqrt {\frac{1}{n} \sum_{i=1}^{n} (s(\mathbf{x_i}) - y_{i})^2}
+	\end{equation}
+	
+ Here, $s(\mathbf{x_i})$ for the value predicted by the candidate model $s$ for an input vector $\mathbf{x_i}$, $y_{i}$ for the (exact) target value, and $\overline{y}$ for the mean of all target values.
+ 
+ \fxnote{TODO}
+ 
 %In this section we formally define the SR problem.
 
 %\begin{definition}
