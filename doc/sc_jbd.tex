@@ -280,7 +280,7 @@ benchmarking standards were not known until the work of  La Cava et al.~\cite{la
 Nowadays, SR is pushed into the rank of moderate-to-extreme accuracy.  It has proven its strength and applicability in solving many problems from various research fields such as material science~\cite{wang2019symbolic}, wind speed forecasting~\cite{abdellaoui2021symbolic},  highway crash prediction~\cite{veran2023interpretable}, language assessment~\cite{aryadoust2015application}, etc.  Solving SR is known to be NP-hard in general~\cite{virgolin2022symbolic}. 
 
 
-Classification belongs to the field of supervised learning and many algorithms have been proposed to tackle various classes of classification problems (binary, multinomial, multi-class, etc.), see, for example~\cite{cunningham2008supervised, caruana2006empirical}. When comes to the \emph{symbolic classification} (SC) problem, the task here is to finding suitable models (classifiers)  $f^i$ for each class $i \in C$ of a (discrete, finite) set of classes $C$ which are further projected into a dominant  class, by, for example, \texttt{sotfmax}, or \texttt{argmax} projectors (known by the name \emph{one-vs-rest} or \emph{one-to-all}  method). A considerably less work have been done for SC in contrast to SR. Note that solving SR efficiently is just a half of a way to achieve it also for SC. It is known that directly applying GP is not in particular successful for solving the multi-class classification problems especially when comes to the problems with a high number of classes~\cite{korns2018evolutionary}. A survey paper on applying GP to solve (binary and multi-class) classification problems is provided in~\cite{espejo2009survey}.  In the last decade, several papers have been published which succeed to raised the SC accuracy in the level to complete with the existing commercial classification tools. These tools are based on evolutionary algorithms~\cite{korns2018evolutionary}, a Multidimensional genetic programming based approach~\cite{munoz2015m3gp,la2019multidimensional},  evolutionary discriminant analysis~\cite{korns2017evolutionary}, etc. 
+Classification belongs to the field of supervised learning and many algorithms have been proposed to tackle various classes of classification problems (binary, multinomial, multi-class, etc.), see, for example~\cite{cunningham2008supervised, caruana2006empirical}. When comes to the \emph{symbolic classification} (SC) problem, the task here is to finding suitable models (classifiers)  $f^i$ for each class $i \in C$ of a (discrete, finite) set of classes $C$ which are further projected into a dominant  class, by, for example, \texttt{sotfmax}, or \texttt{argmax} transformations (known by the name \emph{one-vs-rest} or \emph{one-to-all}  method). A considerably less work have been done for SC in contrast to SR. Note that solving SR efficiently is just a half of a way to achieve it also for SC. It is known that directly applying GP is not in particular successful for solving the multi-class classification problems especially when comes to the problems with a high number of classes~\cite{korns2018evolutionary}. A survey paper on applying GP to solve (binary and multi-class) classification problems is provided in~\cite{espejo2009survey}.  In the last decade, several papers have been published which succeed to raised the SC accuracy in the level to complete with the existing commercial classification tools. These tools are based on evolutionary algorithms~\cite{korns2018evolutionary}, a Multidimensional genetic programming based approach~\cite{munoz2015m3gp,la2019multidimensional},  evolutionary discriminant analysis~\cite{korns2017evolutionary}, etc. 
 
 In this paper, motivated by the success of solving SR efficiently provided by the recent studies, we propose two new classification algorithms that solve the problem of SC: ($i$) RILS-ROLS classifier, and ($ii$) HROCH classifier. 
 
@@ -308,25 +308,21 @@ The main contributions are as follows:
 
 In this section we formally define the SR problem.
 
-\begin{definition}\ref{dfn:sr}
-	Given is a dataset $D = \{(\mathbf{x_i}, y_i)\}_{i=1}^n$, where $\mathbf{x_i} \in \mathbb{R}^d$ represents the $i$-th feature (input) vector and $y_i \in \mathbb{R}$ is its corresponding target (output) variable. Suppose the existence of an analytical model of the form $f(\mathbf{x})= g^*(\mathbf{x}, \theta^*) + \epsilon $ that can generate  all observations from $D$.  
-	SR aims at learning $\tilde{f}(\mathbf{x})=  \tilde{g}(\mathbf{x}, \tilde{\theta})  \colon \mathbb{R}^d \mapsto \mathbb{R}$  estimated by searching through the space of (mathematical) expressions  $\tilde{g}$ and parameters $\tilde{\theta}$ where  $\epsilon$ is the observed white noise within the given input data. 
+\begin{definition}\label{dfn:sr}
+	Given is a dataset $D = \{(\mathbf{x_i}, y_i)\}_{i=1}^n$, where $\mathbf{x_i} \in \mathbb{R}^d$ represents the $i$-th feature (input) vector and $y_i \in \mathbb{R}$ is its corresponding target (output) variable. Suppose the existence of an analytical model of the form $s(\mathbf{x})= g^*(\mathbf{x}, \theta^*) + \epsilon $ that can generate  all observations from $D$.  
+	SR aims at learning $\tilde{s}(\mathbf{x})=  \tilde{g}(\mathbf{x}, \tilde{\theta})  \colon \mathbb{R}^d \mapsto \mathbb{R}$  estimated by searching through the space of (mathematical) expressions  $\tilde{g}$ and parameters $\tilde{\theta}$ where  $\epsilon$ is the observed white noise within the given input data. 
 	
 \end{definition}
 
 
-\begin{definition}\ref{dfn:sc}
+\begin{definition}\label{dfn:sc}
 	Given is a dataset $D = \{(\mathbf{x_i}, c_i)\}_{i=1}^n$, where $\mathbf{x_i}$ represents the $i$-th feature vector, and $c_i$  dependent unordered categorical
-	 value from  $\{1, \ldots, K  \} $. The aim of SC is to find $K$ (mathematical) expressions $f^i, i=1, \ldots, K$, so that $F(\mathbf{x_i}) = \textrm{argmax}( f^1(\mathbf{x_i}), \ldots, f^K(\mathbf{x_i})  ) = c_i,$ for $i=1, \ldots, K$. 
+	 value from e.g., $\{1, \ldots, K  \} $, $K\geq 2. $ The aim of SC is to find $K$ (mathematical) expressions $s^i, i=1, \ldots, K$, so that $s(\mathbf{x_i}) = T( s^1\mathbf{x_i}), \ldots, s^K(\mathbf{x_i})  ) = c_i,$ for $i=1, \ldots, K$ where the classification is performed with $T$ which can be based on a threshold  or some other transformation technique, e.g., applying \textrm{argmax}. 
   \end{definition}
  
  
-\emph{Notation}. Let $s \colon \mathbb{R}^n \mapsto \mathbb{R}$ be a model for data $D$ from Definition~\ref{dfn:sr}.  We introduce the following notation. 
-
-\begin{equation}
-	\label{eq:fitness}
-	fit(s) = (2-R^2(s)) \cdot (1+RMSE(s)) \cdot (1+penalty_{size} \cdot size(s))
-\end{equation}
+\emph{Notation}. Let $s \colon \mathbb{R}^d \mapsto \mathbb{R}$ be a model for data $D$ from Definition~\ref{dfn:sr}.  We introduce the following notation for SR. 
+ 
 \begin{equation}
 		R^2(s) = 1- \frac{ \sum_{i=1}^{n} \left( s(\mathbf{x_i}) - y_i \right)^2  }{ \sum_{i=1}^{n} \left( y_{i}  - \overline{y} \right)^2  }
 	\end{equation}
@@ -336,7 +332,15 @@ In this section we formally define the SR problem.
 	
  Here, $s(\mathbf{x_i})$ for the value predicted by the candidate model $s$ for an input vector $\mathbf{x_i}$, $y_{i}$ for the (exact) target value, and $\overline{y}$ for the mean of all target values.
  
- \fxnote{TODO}
+Concerning notation regarding SC, we mention the following metrics %https://www.evidentlyai.com/classification-metrics/multi-class-metrics
+\begin{itemize}
+    \item \emph{accuracy} metric: a measure how many observations were correctly classified;
+    \item   \emph{precision} metric: one calculate the precision for each class individually, and then to ``average'' the precision  across all classes (use macro or micro averaging).
+    \item  \emph{recall} metric: the same calculation as for the precision metric performed but with the \emph{recall}; recall verifies the model's ability of identifying all instances of a particular class. 
+    \item $F_1$ metric: the harmonic mean of two score, precision and recall; in the multi-class classification, the $F_1$ score is calculated per class applying one-vs-rest manner. 
+     %https://www.baeldung.com/cs/multi-class-f1-score
+       
+\end{itemize}
  
 %In this section we formally define the SR problem.
 
