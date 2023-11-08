@@ -355,10 +355,14 @@ Concerning notation regarding SC, we mention the following metrics %https://www.
 
 	\section{The proposed algorithms}\label{sec:rils}
 
- 
+ This section presents two new classification algorithms for the problem of Symbolic classification. The first one are based on the state-of-the-art method to solving ground-truth-based SR, whilst the second one is a new \textsc{Hroch} method that is based on a classical hill-climbing methodology utilizing a high degree of parallelism in there. 
  
 
 \subsection{The \textsc{RILS}-\textsc{ROLS}  classifier}
+
+Let us first describe the basic principle on which the \textsc{Rils}-\textsc{Rols} algorithms is built on. For all the details on this method, we refer reader to the paper~\cite{kartelj2023rils}. 
+
+ This method combines the popular iterated local search meta-heuristic (ILS)~\cite{lourencco2003iterated,lourencco2010iterated} with the ordinary least square method (OLS)~\cite{leng2007ordinary}. \fxnote{marko -- proceed}
  
  \subsection{The \textsc{Hroch}  classifier}
  \fxnote{TODO}
