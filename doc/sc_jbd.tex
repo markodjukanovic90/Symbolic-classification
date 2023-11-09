@@ -360,9 +360,14 @@ Concerning notation regarding SC, we mention the following metrics %https://www.
 
 \subsection{The \textsc{RILS}-\textsc{ROLS}  classifier}
 
-Let us first describe the basic principle on which the \textsc{Rils}-\textsc{Rols} algorithms is built on. For all the details on this method, we refer reader to the paper~\cite{kartelj2023rils}. 
+Let us first describe the basic principle on which the \textsc{Rils}-\textsc{Rols} algorithms is built on. For all the details on this method, we refer readers to the paper~\cite{kartelj2023rils}. 
 
- This method combines the popular iterated local search meta-heuristic (ILS)~\cite{lourencco2003iterated,lourencco2010iterated} with the ordinary least square method (OLS)~\cite{leng2007ordinary}. \fxnote{marko -- proceed}
+ This method combines the popular iterated local search meta-heuristic (ILS)~\cite{lourencco2003iterated,lourencco2010iterated} with the ordinary least square method (OLS)~\cite{leng2007ordinary}.  Iterated local search serves as a method backbone, which mainly tackles combinatorial aspects of the problem consisting of searching for essential functional forms which are further tuned later in the search to generate good solutions. OLS algorithm tackles continuous aspects of the problem, that is it efficiently determines best-fitting coefficients of  linear  combinations within solution equations. One of the  important steps of the algorithm is generating perturbations near a solution, i.e. the set of solutions  which are close to solution $s$ with a ``distance'' of 1 (called 1-perturbation). This is done by making simple changes on the per-node level of solution's expression tree.  These per-node change operations are predefined in the algorithm, see~\cite{kartelj2023rils}.  
+ 
+ To verify goodness of solutions in the search process, a carefully designed fitness function has been utilized which takes into consideration three model quality scores -- $R^2$, \emph{RMSE} and the size of model, combined in a non-linear function. In order to intensify the search, an efficient local search procedure has been employed around each solution, based on the concept of the extended 1--perturbations, so generating solutions which are in the vicinity of solution $s$ respecting the extended set of pre-defined per-node-changes. LS applies the best-improvement search strategy,  see the above-mentioned paper. It is worth noting that the LS plays an important role as it also performs general coefficient tuning, unlike OLS that does the fitting only in linear combinations.  
+ 
+ 
+ \fxnote{TODO. explain the process of transformation of RILS-ROLS  to a classifier...}
  
  \subsection{The \textsc{Hroch}  classifier}
  \fxnote{TODO}
