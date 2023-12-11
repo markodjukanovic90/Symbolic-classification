@@ -415,6 +415,7 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
  \emph{Rils-Rols classifier}.  Now, it is necessary to turn the \textsc{Rils}-\textsc{Rols} algorithm, a state-of-the-art tool for solving the Symbolic regression problem, into a classifier. We do it for the problem of (symbolic) binary classification w.r.t.\ the value of a treshold parameter. More precisely, for a model $s$ obtained by executing the \textsc{Rils}-\textsc{Rols} algorithm evaluated on the historical data $D$, the concrete $\textbf{x}_i \in D$ is mapped to the corresponding target value of 1 if $s(\textbf{x}_i) \geq treshold$ or 0 otherwise. Interestingly, according to our experimental evaluation, the best \textit{accuracy} is  obtained by setting $treshold=0.5$. 
   
  \subsection{The \textsc{Hroch}  classifier}
+ \fxnote{Marko: this section needs for further revisions...}
 \textit{ The HROCH parameters}  %https://github.com/janoPig/HROCH/blob/main/docs/HROCH.md
  \begin{itemize}
  	\item $pop_{size}$: Number of individuals in the population
@@ -439,11 +440,31 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
  \end{itemize}
 
 
-\textit{Fitness function}.  TODO\\
+\textit{Fitness function}. TODO \fxnote{$f_{hroch}(s)$=??}\\
 
-\textit{Tournament selection}.  Among the current set of solutions (models), the $pop_{sel}$ if them is selected randomly and one with the best fitness score has been returned afterwards. 
+\textit{Tournament selection}.  Among the current population of solutions (models), the $pop_{sel}$ of them are selected randomly and one with the best fitness score has been returned afterwards. 
 
 \textit{Mutation}. TODO
+
+\textit{Basic HROCH scheme}. The algorithm is based on the concept of hill climbing that is suited also to run in a parallel mode. The basic hill climbing algorithm~\cite{ohashi2003hill} is  a simple heuristic search algorithm which belongs to the class of local search--based algorithms. In the basic hill climbing, the algorithm starts with an initial solution and then iteratively makes small changes to improve the solution.  These changes are based on the utilization of a heuristic function that evaluates the quality of the solution. The algorithm usually terminates when none of the small changes of the current best solution yields an improvement. Note that the HROCH algorithm, unlike the basic hill climbing, works with a population of solutions at each iteration. The basic pseudocode of the algorithm is given in Algorithm~\ref{alg:hroch}.
+
+\begin{algorithm}
+	\begin{algorithmic}[1]
+		\Statex \textbf{Input}: dataset $D$, $pop_{size}, pop_{sel}, feature_{probs}$ 
+		\Statex \textbf{Output}: solution (model) $s$
+		\State $s_{pop} \gets GenerateInitial()$
+        \While{! some of the termination criteria is met }			
+             \For{$s \in s_{pop}$}
+                  \State $N_s \gets$ generate neighbors of $s$ by applying mutations in a tournament selection
+                  \State $s^* \gets$ find the best by the fitness value in the set $N_s$
+                  \State TODO
+             \EndFor
+        \EndWhile
+	\end{algorithmic}
+    \caption{The basic scheme of HROCH.}
+\end{algorithm}
+
+
  \fxnote{Marko: TODO -- the main algorithm's flow...} % https://github.com/janoPig/sr_core/tree/main/Hroch
  
  
