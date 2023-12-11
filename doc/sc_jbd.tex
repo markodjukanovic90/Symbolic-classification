@@ -310,14 +310,14 @@ The main contributions are as follows:
 
 In this section we formally define the SR problem.
 
-\begin{definition}\label{dfn:sr}
+\begin{definition}[Symbolic regression]\label{dfn:sr}
 	Given is a dataset $D = \{(\mathbf{x_i}, y_i)\}_{i=1}^n$, where $\mathbf{x_i} \in \mathbb{R}^d$ represents the $i$-th feature (input) vector and $y_i \in \mathbb{R}$ is its corresponding target (output) variable. Suppose the existence of an analytical model of the form $s(\mathbf{x})= g^*(\mathbf{x}, \theta^*) + \epsilon $ that can generate  all observations from $D$.  
 	SR aims at learning $\tilde{s}(\mathbf{x})=  \tilde{g}(\mathbf{x}, \tilde{\theta})  \colon \mathbb{R}^d \mapsto \mathbb{R}$  estimated by searching through the space of (mathematical) expressions  $\tilde{g}$ and parameters $\tilde{\theta}$ where  $\epsilon$ is the observed white noise within the given input data. 
 	
 \end{definition}
 
 
-\begin{definition}\label{dfn:sc}
+\begin{definition}[Symbolic classification]\label{dfn:sc}
 	Given is a dataset $D = \{(\mathbf{x_i}, c_i)\}_{i=1}^n$, where $\mathbf{x_i}$ represents the $i$-th feature vector, and $c_i$  dependent unordered categorical
 	 value from e.g., $\{1, \ldots, K  \} $, $K\geq 2. $ The aim of SC is to find $K$ (mathematical) expressions $s^i, i=1, \ldots, K$, so that $s(\mathbf{x_i}) = T( s^1\mathbf{x_i}), \ldots, s^K(\mathbf{x_i})  ) = c_i,$ for $i=1, \ldots, K$ where the classification is performed with $T$ which can be based on a threshold  or some other transformation technique, e.g., applying \textrm{argmax}. 
   \end{definition}
@@ -415,8 +415,40 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
  \emph{Rils-Rols classifier}.  Now, it is necessary to turn the \textsc{Rils}-\textsc{Rols} algorithm, a state-of-the-art tool for solving the Symbolic regression problem, into a classifier. We do it for the problem of (symbolic) binary classification w.r.t.\ the value of a treshold parameter. More precisely, for a model $s$ obtained by executing the \textsc{Rils}-\textsc{Rols} algorithm evaluated on the historical data $D$, the concrete $\textbf{x}_i \in D$ is mapped to the corresponding target value of 1 if $s(\textbf{x}_i) \geq treshold$ or 0 otherwise. Interestingly, according to our experimental evaluation, the best \textit{accuracy} is  obtained by setting $treshold=0.5$. 
   
  \subsection{The \textsc{Hroch}  classifier}
- \fxnote{TODO}
- XX
+\textit{ The HROCH parameters}  %https://github.com/janoPig/HROCH/blob/main/docs/HROCH.md
+ \begin{itemize}
+ 	\item $pop_{size}$: Number of individuals in the population
+ 	\item $pop_{sel}$:  the size of a tournament selection in each iteration (default value is equal to 4)
+ 	\item $feature_{probs}$: the probability that a mutation will select a feature
+ \end{itemize}
+ 
+\textit{ Stopping criteria}. The algorithm run until at least one of the two criteria is met:
+ \begin{itemize}
+ 	\item  $time_{limit}$: time limit is reached
+ 	\item $iter_{limit}$: number of iteration has exceeded.
+ 	
+ \end{itemize}
+ The algorithm work on the set of predefined mathematical functions such as: pow, exp, log, sqrt, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh. 
+ The set of predefined arithmetic operators includes but not limited to: no use of operation, $+, -, \cdot, /,$ and sq2. Some other operations that may be used are the inverse, the multiplicative inverse, $\min, \max$, floor, ceil, $\geq, >, \leq, <$, etc. 
+ 
+ Pre-defined values in the algorithm:
+ 
+ \begin{itemize}
+ 	\item Predefined constants along with the probabilities of selecting one of the predefined constants used during initialization 
+ 	\item Predefined constants used during equations search along with the pre-defined probabilities of their selection
+ \end{itemize}
+
+
+\textit{Fitness function}.  TODO\\
+
+\textit{Tournament selection}.  Among the current set of solutions (models), the $pop_{sel}$ if them is selected randomly and one with the best fitness score has been returned afterwards. 
+
+\textit{Mutation}. TODO
+ \fxnote{Marko: TODO -- the main algorithm's flow...} % https://github.com/janoPig/sr_core/tree/main/Hroch
+ 
+ 
+ 
+
  
 \section{Experimental evaluation}\label{sec:experiments}
 
