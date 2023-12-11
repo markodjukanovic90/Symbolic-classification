@@ -334,7 +334,7 @@ In this section we formally define the SR problem.
 	
  Here, $s(\mathbf{x_i})$ for the value predicted by the candidate model $s$ for an input vector $\mathbf{x_i}$, $y_{i}$ for the (exact) target value, and $\overline{y}$ for the mean of all target values.
  
-Concerning notation regarding SC, we mention the following metrics %https://www.evidentlyai.com/classification-metrics/multi-class-metrics
+Concerning notation regarding SC, we mention the following (multi-class) metrics  %https://www.evidentlyai.com/classification-metrics/multi-class-metrics
 \begin{itemize}
     \item \emph{accuracy} metric: a measure how many observations were correctly classified;
     \item   \emph{precision} metric: one calculate the precision for each class individually, and then to ``average'' the precision  across all classes (use macro or micro averaging).
@@ -346,7 +346,55 @@ Concerning notation regarding SC, we mention the following metrics %https://www.
  
  	\section{The proposed algorithms}\label{sec:rils}
 
- This section presents two new classification algorithms for the problem of Symbolic classification. The first one are based on the state-of-the-art method to solving ground-truth-based SR, whilst the second one is a new \textsc{Hroch} method that is based on a classical hill-climbing methodology utilizing a high degree of parallelism in there. 
+ This section presents two new classification algorithms for the problem of Symbolic classification. The first one is based on the state-of-the-art method to solving ground-truth-based SR, whilst the second one is a new \textsc{Hroch} method that is based on a classical hill-climbing methodology utilizing a high degree of parallelism in there. 
+ 
+
+\subsection{Search space of symbolic regression} 
+ 
+Koza~\cite{koza1994genetic} pioneered the exploration of Symbolic Regression (SR) as a specific application of Genetic programming (GP). Genetic programming is a versatile approach applicable to the optimization of nonlinear structures, such as computer programs. Programs are represented using syntax trees composed of functions/operations involving input features and constants. A concrete illustration of a function represented by a syntax tree is provided in Figure~\ref{fig:syntax-tree-example}. Fundamentally, any valid syntax trees constitutes the solution search space for SR. In this context, each sample model $\tilde{f}$ corresponds to a distinct point in the search space, represented by a corresponding syntax tree.
+
+The accuracy of a solution can be assessed based on historical data $D$ and a selected error metric, such as $MSE$, $RMSE$, $R^2$, or a combination thereof. Notably, the SR search space exhibits a dual nature: it is both discrete and continuous. While primarily conceptualized as a discrete optimization problem due to the countable number of possible solution functional forms, it also encompasses elements addressable through continuous (global) optimization. This, for example, includes the fitting of constants (coefficients). Standard elementary mathematical functions commonly employed in this context include $\sqrt{x}$, $x^2$, $\sin$, $\cos$, $\log$, $\exp$, $\arcsin$, $\arccos$, $a^x$, complemented by a set of standard arithmetic operators: $+$, $-$, $\cdot$, and $/$.
+ 
+ \begin{figure}[!ht]
+ 	\centering
+ 	\begin{tikzpicture}
+ 		[font=\small, edge from parent, 
+ 		every node/.style={top color=white, bottom color=blue!25, 
+ 			rectangle,rounded corners, minimum size=6mm, draw=blue!75,
+ 			very thick, drop shadow, align=center},
+ 		edge from parent/.style={draw=blue!50,thick},
+ 		level 1/.style={sibling distance=3cm},
+ 		level 2/.style={sibling distance=1.2cm}, 
+ 		level 3/.style={sibling distance=1cm}, 
+ 		level distance=2cm,
+ 		]
+ 		\node (A) {$\cdot$} 
+ 		child { node (B) {$\log$}
+ 			%child { node {x} 
+ 				%edge from parent node[left=.5em,draw=none] {} }
+ 			child { node {$x$}}
+ 		}
+ 		child {node (C) {$\cdot$}
+ 			%child { node {x}
+ 				%	child { node {C1a}}
+ 				%}
+ 			child { node {$x$}}
+ 			child { node {$+$}
+ 				child { node {$x$}}
+ 				child { node {$y$} %edge from parent node[right=.5em,draw=none] {$\frac{a}{b}$}
+ 				}
+ 			}
+ 		};
+ 		%	child { node {+} 
+ 			%	child { node {2}}
+ 			%	child { node {$x$}}
+ 			%};
+ 		
+ 	\end{tikzpicture}
+ 	
+ 	\caption{Syntax tree representation for the expression $\log{x} \cdot   ( x \cdot ( x + y )˘)$}
+ 	\label{fig:syntax-tree-example}
+ \end{figure}
  
 
 \subsection{The \textsc{RILS}-\textsc{ROLS}  classifier}
@@ -364,7 +412,7 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
 
   \emph{Local search}. In order to intensify the search, an efficient local search procedure has been employed around each solution based on a concept of the \emph{extended} 1--perturbations. That is,   solutions which are in the vicinity of $s$ are generated w.r.t.\ the extended set of pre-defined per-node-changes, see again~\cite{kartelj2023rils}.  LS applies the best-improvement search strategy.  Thanks to the extended  per-node-changes, the LS procedure additionally performed an efficient and  important general coefficient tuning, unlike OLS that does the fitting only in linear combinations.  In the context of fitness function \emph{fit}, an effective way of calculation is performed utilizing the \emph{expression caching}. 
  
- \emph{Rils-Rols classifier}.  Now, in order to transfer the \textsc{Rils}-\textsc{Rols} algorithms, a state-of-the-art tool for solving the Symbolic regression problems, it has to be turned into a classifier. Here we do it for the problem of (symbolic) binary classification w.r.t.\ a value of treshold parameter. More precisely, for a model $s$ obtained by executing the \textsc{Rils}-\textsc{Rols} algorithm for input data $D$, for $\textbf{x}_i \in D$ the corresponding target value is equal 1 if $s(\textbf{x}_i) \geq treshold$ or 0 otherwise. Interestingly, according to our experimental evaluation, the best \textit{accuracy}  is  obtained by setting $treshold=0.5$. 
+ \emph{Rils-Rols classifier}.  Now, it is necessary to turn the \textsc{Rils}-\textsc{Rols} algorithm, a state-of-the-art tool for solving the Symbolic regression problem, into a classifier. We do it for the problem of (symbolic) binary classification w.r.t.\ the value of a treshold parameter. More precisely, for a model $s$ obtained by executing the \textsc{Rils}-\textsc{Rols} algorithm evaluated on the historical data $D$, the concrete $\textbf{x}_i \in D$ is mapped to the corresponding target value of 1 if $s(\textbf{x}_i) \geq treshold$ or 0 otherwise. Interestingly, according to our experimental evaluation, the best \textit{accuracy} is  obtained by setting $treshold=0.5$. 
   
  \subsection{The \textsc{Hroch}  classifier}
  \fxnote{TODO}
