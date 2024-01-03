@@ -418,50 +418,96 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
  \fxnote{Marko: this section needs for further revisions...}
 \textit{ The HROCH parameters}  %https://github.com/janoPig/HROCH/blob/main/docs/HROCH.md
  \begin{itemize}
- 	\item $pop_{size}$: Number of individuals in the population
- 	\item $pop_{sel}$:  the size of a tournament selection in each iteration (default value is equal to 4)
- 	\item $feature_{probs}$: the probability that a mutation will select a feature
+ 	\item $pop_{size}$: Number of individuals in the population (default value is equal to 64).
+ 	\item $pop_{sel}$: The size of a tournament selection in each iteration (default value is equal to 4).
+ 	\item $code_{min size}, code_{max size}$: Minimum/maximum allowed size for a individual.
+ 	\item $const_{size}$: Maximum alloved constants in symbolic model.
+ 	\item $predefined_{const prob}$: Probability of selecting one of the predefined constants during equations mutation.
+ 	\item $predefined_{const set}$: Predefined constants used during equations mutation.
+ 	\item $problem$: Set of mathematical functions used in searched equations. Each mathematical function can have a defined weight with which it will be selected in the mutation process. By default, common mathematical operations such as multiplication and addition have a higher weight than goniometric functions or $pow$ and $\exp$. This is a natural way to eliminate $\sin(\sin(\exp(x)))$-type equations, which may have high precision and low complexity, but are usually inappropriate and difficult to interpret.
+ 	\item $feature_{probs}$: The probability that a mutation process will select a feature. This parameter allows using feature importances provided by a black-box regressor as an input parameter for symbolic regression to speed up the search by selecting mainly the important features.
+ 	\item $metric$: Metric used to verify goodness of solutions in the search process. Choose from MSE, MAE, MSLE, LogLoss.
+ 	\item $transformation$: Final transformation for computed value. Choose from logistic function for a classification tasks, no transformation for a regression problems, and ordinal(rounding) for a ordinal regression.
+ 	\item $sample_{weight}$: Array of weights that are assigned to individual samples.
+ 	\item $class_{weight}$: Weights associated with classes for a classification tasks with imbalanced classes distribution.
  \end{itemize}
  
 \textit{ Stopping criteria}. The algorithm run until at least one of the two criteria is met:
  \begin{itemize}
- 	\item  $time_{limit}$: time limit is reached
- 	\item $iter_{limit}$: number of iteration has exceeded.
- 	
- \end{itemize}
- The algorithm work on the set of predefined mathematical functions such as: pow, exp, log, sqrt, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh. 
- The set of predefined arithmetic operators includes but not limited to: no use of operation, $+, -, \cdot, /,$ and sq2. Some other operations that may be used are the inverse, the multiplicative inverse, $\min, \max$, floor, ceil, $\geq, >, \leq, <$, etc. 
- 
- Pre-defined values in the algorithm:
- 
- \begin{itemize}
- 	\item Predefined constants along with the probabilities of selecting one of the predefined constants used during initialization 
- 	\item Predefined constants used during equations search along with the pre-defined probabilities of their selection
+ 	\item  $time_{limit}$: Time limit is reached.
+ 	\item $iter_{limit}$: Number of iteration has exceeded.
  \end{itemize}
 
+\textit{Fitness function}. To verify goodness of solutions for a classification task in the search process is by default used $LogLoss$ function combined with a logistic transformation. For a regression task is used a $MSE$ function.
 
-\textit{Fitness function}. TODO \fxnote{$f_{hroch}(s)$=??}\\
+\begin{equation}\label{eq:fitness-hroch-classification} 
+	\texttt{LogLoss}(y, p) = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \cdot \log(p_i) + (1 - y_i) \cdot \log(1 - p_i) ] \cdot w_i \cdot c[y_i]
+\end{equation}
 
-\textit{Tournament selection}.  Among the current population of solutions (models), the $pop_{sel}$ of them are selected randomly and one with the best fitness score has been returned afterwards. 
+\begin{equation}\label{eq:fitness-hroch-regression} 
+\texttt{MSE}(y, \hat{y}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2 \cdot w_i
+\end{equation}
 
-\textit{Mutation}. TODO
+where $N$ is a number of examples in the dataset, $y_i$ ground truth (true value) for the i-th example, $\hat{y}_i$ predicted value for the i-th example, $p_i$ predicted probability of the positive class for the i-th example, $w_i$ sample weight, $c[y_i]$ class weight for a given class $y_i$.
 
-\textit{Basic HROCH scheme}. The algorithm is based on the concept of hill climbing that is suited also to run in a parallel mode. The basic hill climbing algorithm~\cite{ohashi2003hill} is  a simple heuristic search algorithm which belongs to the class of local search--based algorithms. In the basic hill climbing, the algorithm starts with an initial solution and then iteratively makes small changes to improve the solution.  These changes are based on the utilization of a heuristic function that evaluates the quality of the solution. The algorithm usually terminates when none of the small changes of the current best solution yields an improvement. Note that the HROCH algorithm, unlike the basic hill climbing, works with a population of solutions at each iteration. The basic pseudocode of the algorithm is given in Algorithm~\ref{alg:hroch}.
+\textit{Equations representation}. Searched equations are represented as a fixed-length computer program encoded in three-address instructions code. $tmp_{i} = op_i(src_{1i}, src_{2i})$ If the $\text{op}$ is unary, $\text{src}_{2i}$ is not used. The result of the last operation is taken as the global result. Not all instructions in given program must be used. $src_{1i}$ and $src_{2i}$ can point to one of variables, another instruction with lower index, or to one from constants. Each individual have a fixed number of constants given by algorithm parameter $const_{size}$.
+\fxnote{Jano: TODO -- maybe citation to some Mihai Olteans work, his Multi Expression Programming use similat 3ops code}
+\textit{Tournament selection}. Among the current population of solutions (models), the $pop_{sel}$ of them are selected randomly and one with the best fitness score has been returned afterwards.
+
+\textit{Mutation}. Each random neighbor generation procedure consists of one code mutation and one constant mutation. The code mutation selects one random instruction from used instructions and randomly changes their mathematical operation or operand sources, or both. If the $src_{1i}$ or $src_{2i}$ refers to the result of another instruction, then with $50\%$ probability the mutation is performed on that instruction as well. To mutation $op_i$ is used weighted random sampling algorithm which use weights from $problem$ parameter given as input to algorithm. When a result of mutation $src_{1i}$ or $src_{2i}$ is a variable(feature) then is also weighted random sampling algorithm used with weights given in $feature_{probs}$ parameter. Basic constant mutation consist of multiplication or division mutated constant by $\delta$ value.
+
+\begin{equation}\label{eq:hroch-mutation}
+	\delta = 1 + \xi^4 + \epsilon, \quad \xi \sim U(0, 1),
+	c_{new} = c_{old} * \delta \lor c_{new} = c_{old} / \delta
+\end{equation}
+
+where $\xi$ is a random variable in interval (0, 1)and $\epsilon$ A very small constant ($10^{-6}$). If a $predefined_{const set}$ parameter is given then mutation will with $predefined_{const prob}$ probability select one from predefined constants given to algorithm.
+
+\textit{Basic HROCH scheme}. The algorithm is based on the concept of hill climbing that is suited also to run in a parallel mode. The basic hill climbing algorithm~\cite{ohashi2003hill} is  a simple heuristic search algorithm which belongs to the class of local search--based algorithms. In the basic hill climbing, the algorithm starts with an initial solution and then iteratively makes small changes to improve the solution. The algorithm usually terminates when none of the small changes of the current best solution yields an improvement. Note that the HROCH algorithm, unlike basic hill climbing, works with a population of independent solutions that compete for the time allotted for their evolution (tournament selection). Like Tabu's search, it improves the performance of local search by relaxing its basic rule. At each step, the best candidate replaces the previous solution unless there is a significant worsening of the score. Implementation of Tabu list for the symbolic regression problem can be complicated because the problem consists of a discrete(finding a suitable equation) and a continuous(fine-tuning the constants used) optimization problem. Instead, two contradictory ideas are used. Choosing the best solution from n generated neighbors tends to the solution with the better score. Not following the strict rule that a necessarily better solution must be found avoids getting stuck in a local minimum. The basic pseudocode of the algorithm is given in Algorithm~\ref{alg:hroch}.
 
 \begin{algorithm}
 	\begin{algorithmic}[1]
-		\Statex \textbf{Input}: dataset $D$, $pop_{size}, pop_{sel}, feature_{probs}$ 
-		\Statex \textbf{Output}: solution (model) $s$
-		\State $s_{pop} \gets GenerateInitial()$
-        \While{! some of the termination criteria is met }			
-             \For{$s \in s_{pop}$}
-                  \State $N_s \gets$ generate neighbors of $s$ by applying mutations in a tournament selection
-                  \State $s^* \gets$ find the best by the fitness value in the set $N_s$
-                  \State TODO
-             \EndFor
+		\Statex \textbf{Input}: Input training dataset $D_{tr}$
+		\Statex \textbf{Control parameters}: $sample_{size}, pop_{sel}, neighbours_{count}, worsening_{limit}$ 
+		\Statex \textbf{Output}: Best symbolic formula solution (model) $bs$
+		\State $s_{pop} \gets RandomIndividuals()$
+		\For{$s \in s_{pop}$}
+			\State $s.D_{tr}^{'} \gets Sample(D_{tr}, sample_{size})$
+			\State $s.current.score^{'}, s.D_{tr}^{''} \gets Evaluate(s.current, s.D_{tr}^{'})$
+			\Comment{$s.D_{tr}^{''}$ is a small portion of the data (the batch with size 64 rows) from sample $D_{tr}^{'}$ with the worst score.}
+		\EndFor
+        \While{! some of the termination criteria is met }
+			\State $s \gets TournamentSelection(s_{pop}, pop_{sel})$
+			\State $bestNeighbour \gets \emptyset$
+            \For{$i = 0$ to $neighbours_{count}$}
+				\State $neighbour \gets s.current$
+				\State $DoMutation(neighbour)$
+				\State $neighbour.score^{''} \gets Evaluate(neighbour, s.D_{tr}^{''})$
+				\If{$neighbour.score^{''} < s.current.score^{''}*(1 + worsening_{limit})$}
+					\State $neighbour.score^{'}, s.D_{tr}^{''} \gets Evaluate(neighbour, s.D_{tr}^{'})$
+					\If{$neighbour.score^{'} < bestScore$}
+						\State $bestNeighbour \gets neighbour$
+					\EndIf
+				\EndIf
+            \EndFor
+			\If{$bestNeighbour \neq \emptyset$ and $bestNeighbour.score^{'} < s.best.score{'} * (1 + worsening_{limit})$}
+				\State $s.currentSolution \gets bestNeighbour$
+				\If{$bestNeighbour.score^{'} < individual.bestSolution.score{'}$}
+					\State $s.bestSolution \gets bestNeighbour$
+				\EndIf
+			\EndIf
         \EndWhile
+		\For{$s \in s_{pop}$}
+			\State $s.score \gets Evaluate(individual, D_{tr})$
+			\If{$s.score < bs.score$}
+				\State $bs \gets s$
+			\EndIf
+		\EndFor
+		\State
+		\Return{$bs$}
 	\end{algorithmic}
     \caption{The basic scheme of HROCH.}
+	\label{alg:hroch} 
 \end{algorithm}
 
 
