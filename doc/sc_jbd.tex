@@ -415,7 +415,7 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
  \emph{Rils-Rols classifier}.  Now, it is necessary to turn the \textsc{Rils}-\textsc{Rols} algorithm, a state-of-the-art tool for solving the Symbolic regression problem, into a classifier. We do it for the problem of (symbolic) binary classification w.r.t.\ the value of a treshold parameter. More precisely, for a model $s$ obtained by executing the \textsc{Rils}-\textsc{Rols} algorithm evaluated on the historical data $D$, the concrete $\textbf{x}_i \in D$ is mapped to the corresponding target value of 1 if $s(\textbf{x}_i) \geq treshold$ or 0 otherwise. Interestingly, according to our experimental evaluation, the best \textit{accuracy} is  obtained by setting $treshold=0.5$. 
   
  \subsection{The \textsc{Hroch}  classifier}
- \fxnote{Marko: this section needs for further revisions...}
+ \fxnote{Marko: not all parameters will be mentioned -- will be adapted later on...}
 \textit{ The HROCH parameters}  %https://github.com/janoPig/HROCH/blob/main/docs/HROCH.md
  \begin{itemize}
  	\item $pop_{size}$: Number of individuals in the population (default value is equal to 64).
@@ -438,7 +438,7 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
  	\item $iter_{limit}$: Number of iteration has exceeded.
  \end{itemize}
 
-\textit{Fitness function}. To verify goodness of solutions for a classification task in the search process is by default used $LogLoss$ function combined with a logistic transformation. For a regression task is used a $MSE$ function.
+\textit{Fitness function}. To verify goodness of solutions for a classification task in the search process, we used $LogLoss$ function combined with a logistic transformation. For a regression task a $MSE$ function is utilized. That is:
 
 \begin{equation}\label{eq:fitness-hroch-classification} 
 	\texttt{LogLoss}(y, p) = -\frac{1}{N} \sum_{i=1}^{N} [ y_i \cdot \log(p_i) + (1 - y_i) \cdot \log(1 - p_i) ] \cdot w_i \cdot c[y_i]
@@ -448,28 +448,34 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
 \texttt{MSE}(y, \hat{y}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2 \cdot w_i
 \end{equation}
 
-where $N$ is a number of examples in the dataset, $y_i$ ground truth (true value) for the i-th example, $\hat{y}_i$ predicted value for the i-th example, $p_i$ predicted probability of the positive class for the i-th example, $w_i$ sample weight, $c[y_i]$ class weight for a given class $y_i$.
+where $N$ is the number of elements (rows) of the dataset, $y_i$ is the ground truth (exact) value nad $\hat{y}_i$ is the predicted value for the $i$-th input vector, $p_i$ predicted probability of the positive class of the $i$-th input vector, $w_i$ sample weight, $c[y_i]$ class weight for a given class $y_i$. \fxnote{Jano, these weights $w_i$ and $c[y_i]$ are associated with the input params values $sample_{weight}$ and $class_{weight}$, right? }
 
-\textit{Equations representation}. Searched equations are represented as a fixed-length computer program encoded in three-address instructions code. $tmp_{i} = op_i(src_{1i}, src_{2i})$ If the $\text{op}$ is unary, $\text{src}_{2i}$ is not used. The result of the last operation is taken as the global result. Not all instructions in given program must be used. $src_{1i}$ and $src_{2i}$ can point to one of variables, another instruction with lower index, or to one from constants. Each individual have a fixed number of constants given by algorithm parameter $const_{size}$.
-\fxnote{Jano: TODO -- maybe citation to some Mihai Olteans work, his Multi Expression Programming use similat 3ops code}
-\textit{Tournament selection}. Among the current population of solutions (models), the $pop_{sel}$ of them are selected randomly and one with the best fitness score has been returned afterwards.
+\textit{Solution representation}. Individual equations (solutions) in the search space  are represented as a fixed-length computer program encoded in three-address instructions code~\cite{oltean2002multi}, in the shape of $tmp_{i} = op_i(src_{1,i}, src_{2,i})$. Note that if  operation ${op}$ is unary, ${src}_{2,i}$ will not used. %The result of the last operation is taken as the global result. 
+Not all instructions in given program must be used. Both $src_{1i}$ and $src_{2i}$ may point to one of variables, another instruction with lower index, or to one from constants. Each individual have a fixed number of constants controlled by algorithm parameter $const_{size}$. \fxnote{To all: I wonder if these details are necessary for readers}
+%\fxnote{Jano: TODO -- maybe citation to some Mihai Olteans work, his Multi Expression Programming use similat 3ops code}
+ \\
+\textit{Tournament selection}. Among the current population of solutions (models), the $pop_{sel}$ of them are selected in a random fashion and one with the best fitness score has been returned afterwards. This is know strategy applied in many evolutionary algorithms~\cite{blickle1995mathematical}. 
 
-\textit{Mutation}. Each random neighbor generation procedure consists of one code mutation and one constant mutation. The code mutation selects one random instruction from used instructions and randomly changes their mathematical operation or operand sources, or both. If the $src_{1i}$ or $src_{2i}$ refers to the result of another instruction, then with $50\%$ probability the mutation is performed on that instruction as well. To mutation $op_i$ is used weighted random sampling algorithm which use weights from $problem$ parameter given as input to algorithm. When a result of mutation $src_{1i}$ or $src_{2i}$ is a variable(feature) then is also weighted random sampling algorithm used with weights given in $feature_{probs}$ parameter. Basic constant mutation consist of multiplication or division mutated constant by $\delta$ value.
+\textit{Mutation}. Each generation of neighbors consists of single code mutation and single constant mutation performed randomly. More in details, the code mutation selects one random instruction from the pre-defined instructions and randomly changes their mathematical operation or operand sources, or both. If the $src_{1i}$ or $src_{2i}$ refers to the result of another instruction, then with a $50\%$ probability the mutation is performed on that instruction as well. To mutate $op_i$, a weighted random sampling algorithm which use weights from $problem$ parameter given as input to algorithm. When a result of mutation $src_{1i}$ or $src_{2i}$ is a variable (feature) then we also apply the weighted random sampling with weights given in $feature_{probs}$ parameter. Basic constant mutation consists of multiplication or division of constant by $\delta$ value chosen from the following distribution
 
 \begin{equation}\label{eq:hroch-mutation}
 	\delta = 1 + \xi^4 + \epsilon, \quad \xi \sim U(0, 1),
 	c_{new} = c_{old} * \delta \lor c_{new} = c_{old} / \delta
 \end{equation}
+\fxnote{Jano, how to motivate the usage of $\xi^4$. Why exactly the power of 4?}
+where $\xi$ is a random variable in interval $(0, 1)$ whereas $\epsilon>0$ is a very small constant (fixed to $10^{-6}$). If a set of pre-defined constants $predefined_{const set}$ is passed to the algorithm, the mutation will with choose one constant randomly and with the probability  of $predefined_{const prob}>0$  and replace it with the current. 
 
-where $\xi$ is a random variable in interval (0, 1)and $\epsilon$ A very small constant ($10^{-6}$). If a $predefined_{const set}$ parameter is given then mutation will with $predefined_{const prob}$ probability select one from predefined constants given to algorithm.
+\textit{Basic HROCH scheme}. The algorithm is based on the concept of hill climbing that is suited also to run in a parallel mode. The basic hill climbing algorithm~\cite{ohashi2003hill} is  a simple heuristic which belongs to the class of local search--based algorithms. In the basic hill climbing, the algorithm starts with an initial solution and then iteratively makes small modifications seeking for its improvements. The algorithm usually terminates when none of all possible small changes of the current best solution yield an improvement (of the objective value). 
 
-\textit{Basic HROCH scheme}. The algorithm is based on the concept of hill climbing that is suited also to run in a parallel mode. The basic hill climbing algorithm~\cite{ohashi2003hill} is  a simple heuristic search algorithm which belongs to the class of local search--based algorithms. In the basic hill climbing, the algorithm starts with an initial solution and then iteratively makes small changes to improve the solution. The algorithm usually terminates when none of the small changes of the current best solution yields an improvement. Note that the HROCH algorithm, unlike basic hill climbing, works with a population of independent solutions that compete for the time allotted for their evolution (tournament selection). Like Tabu's search, it improves the performance of local search by relaxing its basic rule. At each step, the best candidate replaces the previous solution unless there is a significant worsening of the score. Implementation of Tabu list for the symbolic regression problem can be complicated because the problem consists of a discrete(finding a suitable equation) and a continuous(fine-tuning the constants used) optimization problem. Instead, two contradictory ideas are used. Choosing the best solution from n generated neighbors tends to the solution with the better score. Not following the strict rule that a necessarily better solution must be found avoids getting stuck in a local minimum. The basic pseudocode of the algorithm is given in Algorithm~\ref{alg:hroch}.
+Note that the HROCH algorithm, unlike basic hill climbing, works with a population of independent solutions that compete for the time allotted for their evolution (tournament selection). Like in the Tabu search, it improves the performance of local search by relaxing its basic rule. At each step, the best candidate replaces the previous solution unless there is a significant worsening of the score. Implementation of Tabu list for the SR problem can be challenging as the search space of SR is dual in its nature -- the discrete search part (finding a suitable equation i.e. the essential equation form) and the continuous part (fine-tuning the constants in the form). Instead, two complementary ideas are used. Choosing the best solution from $n$ generated neighboring solutions tends to the solution with the better score. Relaxing the strict rule that only a necessarily better solution must be followed avoids the algorithm getting stuck in a local minimum. It is controlled by $worsening_{limit}>0$ parameter.  
+
+The basic pseudocode of the algorithm is given in Algorithm~\ref{alg:hroch}.
 
 \begin{algorithm}
 	\begin{algorithmic}[1]
 		\Statex \textbf{Input}: Input training dataset $D_{tr}$
 		\Statex \textbf{Control parameters}: $sample_{size}, pop_{sel}, neighbours_{count}, worsening_{limit}$ 
-		\Statex \textbf{Output}: Best symbolic formula solution (model) $bs$
+		\Statex \textbf{Output}: Symbolic solution (model) $bs$
 		\State $s_{pop} \gets RandomIndividuals()$
 		\For{$s \in s_{pop}$}
 			\State $s.D_{tr}^{'} \gets Sample(D_{tr}, sample_{size})$
@@ -479,7 +485,7 @@ where $\xi$ is a random variable in interval (0, 1)and $\epsilon$ A very small c
         \While{! some of the termination criteria is met }
 			\State $s \gets TournamentSelection(s_{pop}, pop_{sel})$
 			\State $bestNeighbour \gets \emptyset$
-            \For{$i = 0$ to $neighbours_{count}$}
+            \For{$i = 0$ to $neighbours_{count}$} \Comment{try $neighbours_{count}$ neighbors of $s$}
 				\State $neighbour \gets s.current$
 				\State $DoMutation(neighbour)$
 				\State $neighbour.score^{''} \gets Evaluate(neighbour, s.D_{tr}^{''})$
@@ -497,7 +503,7 @@ where $\xi$ is a random variable in interval (0, 1)and $\epsilon$ A very small c
 				\EndIf
 			\EndIf
         \EndWhile
-		\For{$s \in s_{pop}$}
+		\For{$s \in s_{pop}$} \Comment{retrieve the best solution from  $s_{pop}$}
 			\State $s.score \gets Evaluate(individual, D_{tr})$
 			\If{$s.score < bs.score$}
 				\State $bs \gets s$
@@ -511,7 +517,7 @@ where $\xi$ is a random variable in interval (0, 1)and $\epsilon$ A very small c
 \end{algorithm}
 
 
- \fxnote{Marko: TODO -- the main algorithm's flow...} % https://github.com/janoPig/sr_core/tree/main/Hroch
+ \fxnote{Jano, what is individual here, maybe $s$ instead?It appears also at Line 22. bestScore a Line 15 used but never declared before  } %https://github.com/janoPig/sr_core/tree/main/Hroch
  
  
  
