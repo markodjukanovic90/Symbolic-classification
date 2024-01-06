@@ -448,10 +448,10 @@ where  $p_{size}>0$ is a strategic parameter and $|s|$ is the size of solution (
 \texttt{MSE}(y, \hat{y}) = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2 \cdot w_i
 \end{equation}
 
-where $N$ is the number of elements (rows) of the dataset, $y_i$ is the ground truth (exact) value nad $\hat{y}_i$ is the predicted value for the $i$-th input vector, $p_i$ predicted probability of the positive class of the $i$-th input vector, $w_i$ sample weight, $c[y_i]$ class weight for a given class $y_i$. \fxnote{Jano, these weights $w_i$ and $c[y_i]$ are associated with the input params values $sample_{weight}$ and $class_{weight}$, right? }
+where $N$ is the number of elements (rows) of the dataset, $y_i$ is the ground truth (exact) value nad $\hat{y}_i$ is the predicted value for the $i$-th input vector, $p_i$ predicted probability of the positive class of the $i$-th input vector, $w_i$ sample weight, $c[y_i]$ class weight for a given class $y_i$. \fxnote{Jano, these weights $w_i$ and $c[y_i]$ are associated with the input params values $sample_{weight}$ and $class_{weight}$, right? J:Right. }
 
 \textit{Solution representation}. Individual equations (solutions) in the search space  are represented as a fixed-length computer program encoded in three-address instructions code~\cite{oltean2002multi}, in the shape of $tmp_{i} = op_i(src_{1,i}, src_{2,i})$. Note that if  operation ${op}$ is unary, ${src}_{2,i}$ will not used. %The result of the last operation is taken as the global result. 
-Not all instructions in given program must be used. Both $src_{1i}$ and $src_{2i}$ may point to one of variables, another instruction with lower index, or to one from constants. Each individual have a fixed number of constants controlled by algorithm parameter $const_{size}$. \fxnote{To all: I wonder if these details are necessary for readers}
+Not all instructions in given program must be used. Both $src_{1i}$ and $src_{2i}$ may point to one of variables, another instruction with lower index, or to one from constants. Each individual have a fixed number of constants controlled by algorithm parameter $const_{size}$. \fxnote{To all: I wonder if these details are necessary for readers J:I think so too.}
 %\fxnote{Jano: TODO -- maybe citation to some Mihai Olteans work, his Multi Expression Programming use similat 3ops code}
  \\
 \textit{Tournament selection}. Among the current population of solutions (models), the $pop_{sel}$ of them are selected in a random fashion and one with the best fitness score has been returned afterwards. This is know strategy applied in many evolutionary algorithms~\cite{blickle1995mathematical}. 
@@ -462,7 +462,7 @@ Not all instructions in given program must be used. Both $src_{1i}$ and $src_{2i
 	\delta = 1 + \xi^4 + \epsilon, \quad \xi \sim U(0, 1),
 	c_{new} = c_{old} * \delta \lor c_{new} = c_{old} / \delta
 \end{equation}
-\fxnote{Jano, how to motivate the usage of $\xi^4$. Why exactly the power of 4?}
+\fxnote{Jano, how to motivate the usage of $\xi^4$. Why exactly the power of 4? J:In real cases, the constants can be very large or small, so adding/subtracting a small random value to them may not be effective. Therefore multiplying/dividing by some number. Power of 4, because I want to prioritize smaller changes. If the equation is in the correct form, many small mutations of the constants are needed to finetunig. Large changes are also important, but intuitively small changes need more space. $0.5^4$ is 0.0625, so $50\%$ of the mutations are smaller than $6\%$ of the value of the constant. I don't think this is an ideal function, maybe in the future I'll try something similar to the fibonachi sequence.}
 where $\xi$ is a random variable in interval $(0, 1)$ whereas $\epsilon>0$ is a very small constant (fixed to $10^{-6}$). If a set of pre-defined constants $predefined_{const set}$ is passed to the algorithm, the mutation will with choose one constant randomly and with the probability  of $predefined_{const prob}>0$  and replace it with the current. 
 
 \textit{Basic HROCH scheme}. The algorithm is based on the concept of hill climbing that is suited also to run in a parallel mode. The basic hill climbing algorithm~\cite{ohashi2003hill} is  a simple heuristic which belongs to the class of local search--based algorithms. In the basic hill climbing, the algorithm starts with an initial solution and then iteratively makes small modifications seeking for its improvements. The algorithm usually terminates when none of all possible small changes of the current best solution yield an improvement (of the objective value). 
@@ -498,13 +498,13 @@ The basic pseudocode of the algorithm is given in Algorithm~\ref{alg:hroch}.
             \EndFor
 			\If{$bestNeighbour \neq \emptyset$ and $bestNeighbour.score^{'} < s.best.score{'} * (1 + worsening_{limit})$}
 				\State $s.currentSolution \gets bestNeighbour$
-				\If{$bestNeighbour.score^{'} < individual.bestSolution.score{'}$}
+				\If{$bestNeighbour.score^{'} < s.bestSolution.score{'}$}
 					\State $s.bestSolution \gets bestNeighbour$
 				\EndIf
 			\EndIf
         \EndWhile
 		\For{$s \in s_{pop}$} \Comment{retrieve the best solution from  $s_{pop}$}
-			\State $s.score \gets Evaluate(individual, D_{tr})$
+			\State $s.score \gets Evaluate(s, D_{tr})$
 			\If{$s.score < bs.score$}
 				\State $bs \gets s$
 			\EndIf
@@ -517,7 +517,7 @@ The basic pseudocode of the algorithm is given in Algorithm~\ref{alg:hroch}.
 \end{algorithm}
 
 
- \fxnote{Jano, what is individual here, maybe $s$ instead?It appears also at Line 22. bestScore a Line 15 used but never declared before  } %https://github.com/janoPig/sr_core/tree/main/Hroch
+Jan \fxnote{o, what is individual here, maybe $s$ instead?It appears also at Line 22. bestScore a Line 15 used but never declared before J:Right, i forgot change it to $s$  } %https://github.com/janoPig/sr_core/tree/main/Hroch
  
  
  
